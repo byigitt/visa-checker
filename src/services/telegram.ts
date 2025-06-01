@@ -28,10 +28,15 @@ class TelegramService {
     this.startRateLimitReset();
   }
 
-  private escapeMarkdown(text: string): string {
-    return text.replace(/[_*[\\]()~`>#+=|{}.!]/g, "\\\\$&");
+  private escapeHtml(text: string): string {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
-
+  
   /**
    * Bot hata yakalayıcısını ayarlar
    * Bot çalışırken oluşabilecek hataları yakalar ve loglar
@@ -86,62 +91,36 @@ class TelegramService {
     }
   }
 
-  /**
-   * Randevu bilgilerini okunabilir bir mesaj formatına dönüştürür
-   */
   formatMessage(appointment: VisaAppointment): string {
     const lastChecked = new Date(appointment.last_checked_at);
-
-    const formatDate = (date: Date | string) => {
-      if (typeof date === "string") {
-        date = new Date(date);
-      }
+  
+    const formatDate = (date: Date | string): string => {
+      if (typeof date === "string") date = new Date(date);
       return date.toLocaleString("tr-TR", {
         timeZone: "Europe/Istanbul",
         dateStyle: "medium",
         timeStyle: "medium",
       });
     };
-
+  
     const formatAvailableDate = (dateStr?: string): string => {
-      if (!dateStr) return "Bilgi Yok";
-      return this.escapeMarkdown(dateStr);
+      return dateStr ? this.escapeHtml(dateStr) : "Bilgi Yok";
     };
-
-    const statusEmoji =
-      {
-        open: "✅",
-        waitlist_open: "⏳",
-        closed: "❌",
-        waitlist_closed: "🔒",
-      }[appointment.status] || "❓";
-
+  
     return [
-      `*${statusEmoji} YENİ RANDEVU DURUMU\\\\! *
-`,
-      `🏢 *Merkez:* ${this.escapeMarkdown(
-        appointment.center.replace(/\\s*-\\s*/g, "")
-      )}`,
-      `🌍 *Ülke/Misyon:* ${this.escapeMarkdown(
-        appointment.country_code.toUpperCase().replace(/\\s*-\\s*/g, "")
-      )} \\\\-\\\*> ${this.escapeMarkdown(
-        appointment.mission_code.toUpperCase().replace(/\\s*-\\s*/g, "")
-      )}`,
-      `🛂 *Kategori:* ${this.escapeMarkdown(
-        appointment.visa_category.replace(/\\s*-\\s*/g, "")
-      )}`,
-      `📄 *Tip:* ${this.escapeMarkdown(
-        appointment.visa_type.replace(/\\s*-\\s*/g, "")
-      )}`,
-      `🚦 *Durum:* ${statusEmoji} ${this.escapeMarkdown(appointment.status)}`,
-      `🗓️ *Son Müsait Tarih:* ${formatAvailableDate(
-        appointment.last_available_date
-      )}`,
-      `\\n📊 *Takip Sayısı:* ${appointment.tracking_count}`,
-      `\\n⏰ *Son Kontrol:* ${this.escapeMarkdown(formatDate(lastChecked))}`,
-    ].join("\\n");
+      `<b>YENİ RANDEVU</b>`,
+      ``,
+      `<b>Durum:</b> ${this.escapeHtml(appointment.status)}`,
+      `<b>Merkez:</b> ${this.escapeHtml(appointment.center)}`,
+      `<b>Ülke/Misyon:</b> ${this.escapeHtml(appointment.country_code.toUpperCase())} -> ${this.escapeHtml(appointment.mission_code.toUpperCase())}`,
+      `<b>Kategori:</b> ${this.escapeHtml(appointment.visa_category)}`,
+      `<b>Tip:</b> ${this.escapeHtml(appointment.visa_type)}`,
+      `<b>Son Müsait Tarih:</b> ${formatAvailableDate(appointment.last_available_date)}`,
+      `<b>Takip Sayısı:</b> ${appointment.tracking_count}`,
+      `<b>Son Kontrol:</b> ${this.escapeHtml(formatDate(lastChecked))}`,
+    ].join("\n");
   }
-
+  
   /**
    * Yeni randevu bilgisini Telegram kanalına gönderir
    * @returns Mesaj başarıyla gönderildiyse true, hata oluştuysa false döner
@@ -154,7 +133,7 @@ class TelegramService {
         config.telegram.channelId,
         this.formatMessage(appointment),
         {
-          parse_mode: "MarkdownV2",
+          parse_mode: "HTML",
           link_preview_options: {
             is_disabled: true,
           },
