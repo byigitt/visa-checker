@@ -1,3 +1,18 @@
+# ÖNEMLİ BİLGİLENDİRME
+```
+uygulamamı kullanan herkese selamlar,
+
+anlık olarak bir schengen vize arayışım yok, bu yüzden vfs global websitesine erişimim de yok.
+
+bana randevulara erişebilen ve yeni sistemde nasıl eriştiğini gösterebilen birisi olursa, 
+selenium/headless-chrome ile bunu implemente edeceğim (tekrardan işe yarar hale getireceğim).
+
+mailim (baris@bayburt.lu) veya linkedinim (https://linkedin.com/in/bbayburtlu) üzerinden ulaşıp 
+bilgilerinizi sağlarsanız hem kendinize, hem de mağdur olan tüm insanlara yardımcı olursunuz.
+
+çok teşekkürler şimdiden!
+```
+
 # 🔍 Schengen Vize Randevu Takip Botu
 
 Bu bot, Schengen vizesi için randevu durumlarını otomatik olarak takip eder ve uygun randevular bulunduğunda Telegram üzerinden bildirim gönderir.
